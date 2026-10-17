@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>فني على الموتوسيكل</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#17324d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Readex+Pro:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+<canvas id="map" aria-label="خريطة القرى والطرق"></canvas>
+
+<header class="hud" id="hud">
+  <div class="hud-in">
+    <div class="hud-stat"><small>اليوم</small><b class="num" id="hDay">1</b></div>
+    <div class="hud-stat"><small>الساعة</small><b class="num" id="hClock">9:00</b></div>
+    <div class="hud-stat"><small>العهدة</small><b class="num" id="hCust">0</b></div>
+    <div class="hud-stat"><small>المحفظة</small><b class="num" id="hWallet">0</b></div>
+    <div class="hud-stat"><small>بنزين</small><div class="fuel"><i id="hFuel"></i></div></div>
+    <div class="hud-stat hud-sp hide-sm"><small>تقييم العملاء</small><span class="stars" id="hStars"><span class="bg">★★★★★</span><span class="fg">★★★★★</span></span></div>
+    <button class="mute" id="muteBtn" data-act="mute" aria-label="الصوت"><svg viewBox="0 0 24 24"><path id="muteIco" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg></button>
+  </div>
+  <div class="clockbar"><i id="hBar"></i></div>
+</header>
+
+<div id="reqSlot"></div>
+
+<div class="route">
+  <div class="route-in">
+    <button class="act" id="actBtn" data-act="arrive" hidden></button>
+    <div class="panel" id="panel">
+      <button class="panel-h" id="panelToggle" data-act="panel" aria-expanded="false">
+        <span class="tx"><span class="lbl">خط السير · الوجهة</span><span class="tgt" id="tgtName">مفيش وجهة</span></span>
+        <span class="dist num" id="tgtDist"></span>
+        <span class="chev" aria-hidden="true">▴</span>
+      </button>
+      <div class="list" id="stops"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div id="layer"></div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
