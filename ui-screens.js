@@ -1,5 +1,5 @@
-/* الشاشات الكاملة: البداية، تقرير اليوم، نهاية اللعبة، والأكاديمية (الشق التعليمي) */
-import { VERSION } from './config.js';
+/* الشاشات الكاملة: البداية، تقفيل اليومية، والأكاديمية (الشق التعليمي) */
+import { VERSION, BAL } from './config.js';
 import { DEVICES, PARTS } from './data-devices.js';
 import { esc, fmt } from './core-util.js';
 import { S } from './game-state.js';
@@ -11,41 +11,43 @@ const show = (html) => { ui.modal = 'screen'; $('layer').innerHTML = `<div class
 const bestCard = () => { const b = bestScore(); return b ? `<div class="card"><h2>أحسن نتيجة</h2><div>اليوم <b class="num">${b.day}</b> · تحصيل <b class="num">${fmt(b.income)}</b> جنيه</div></div>` : ''; };
 
 export function showIntro() {
-  show(`<div class="hero"><span class="stamp">وردية 9 ص – 5 م</span><h1>فني على الموتوسيكل</h1>
-      <p>إنت فني صيانة أجهزة منزلية. الطلبات بتنزل على موبايلك، وإنت اللي بتسوق للقرى وتفحص وتصلّح وتحصّل.</p></div>
-    <div class="card"><h2>إزاي تلعب</h2><ol class="steps">
-      <li><b>اقبل الطلب</b> اللي بينزل فوق، فيتضاف لخط السير. السهم الأصفر بيوديك للوجهة.</li>
-      <li><b>سوق:</b> اسحب صباعك في أي حتة على الخريطة. على الكمبيوتر الأسهم أو WASD. الأسفلت أسرع، والترعة بتبطّأك.</li>
-      <li>لما توصل للعميل اضغط الزرار وافحص الجهاز، واختار القطعة الصح من دليل الأكواد.</li>
-      <li>القطعة معاك؟ صلّح وحصّل. مش معاك؟ <b>وقّف الأمر على قطعة غيار</b> وخد عربون؛ الأمر يتجمد ووقت العميل يقف.</li>
-      <li>في <b>الورشة</b> بتحمّل قطع وتسلّم العهدة للمحفظة. وما تنساش البنزين.</li>
-    </ol></div>${bestCard()}
-    <button class="btn big" data-act="begin">اطلع على الطريق</button>
+  show(`<div class="hero"><span class="stamp">يوم شغل</span><h1>فني على الموتوسيكل</h1>
+      <p>إنت فني صيانة أجهزة منزلية. كل يوم بتنزل الورشة تلاقي أوامر الشغل، وتاخد قطعك وتلف على العملاء براحتك.</p></div>
+    <div class="card"><h2>يومك ماشي إزاي</h2><ol class="steps">
+      <li><b>في الورشة:</b> هتلاقي ${BAL.ordersPerDay} أوامر شغل. رتّب خط السير بالأسهم.</li>
+      <li><b>المخزن:</b> خد القطع اللي متوقع تحتاجها حسب الأكواد. الصندوق ليه سعة.</li>
+      <li><b>سوق:</b> اسحب صباعك في أي حتة على الخريطة (أو الأسهم على الكمبيوتر). السهم الأصفر بيوديك للوجهة.</li>
+      <li><b>عند العميل:</b> افحص واختار القطعة الصح. معاك؟ صلّح وحصّل. مش معاك؟ وقّف الأمر على قطعة وخد عربون.</li>
+      <li><b>آخر اليوم:</b> ارجع الورشة وقفّل اليومية: العهدة للورشة، والمصنعية ليك. منها تطوّر الموتوسيكل.</li>
+    </ol><div class="kv"><span>مفيش وقت بيخلص ولا عميل بيزهق. خد وقتك، بس خلي بالك من البنزين.</span></div></div>
+    ${bestCard()}
+    <button class="btn big" data-act="begin">انزل الورشة</button>
     <button class="btn big ghost" data-act="academy">الأكاديمية — اتعلم الأعطال</button>
     <div class="ver">نسخة ${VERSION}</div>`);
 }
 
-export function showReport({ handed, carry }) {
+export function showReport({ handed, labor, open }) {
   const st = S.stats, dr = S.rep - st.rep0;
-  show(`<div class="hero"><span class="stamp">قفلنا الوردية</span><h1>تقرير اليوم ${S.day}</h1>
-      <p>اتسلّمت العهدة (${fmt(handed)} ج) والمحفظة دلوقتي <b class="num">${fmt(S.wallet)}</b> جنيه.</p></div>
-    <div class="card"><h2>ملخص خط السير</h2><div class="report">
-      <div><small>تحصيلات نهائية</small><b class="num pos">${fmt(st.coll)}</b></div>
-      <div><small>عرابين</small><b class="num pos">${fmt(st.deps)}</b></div>
-      <div><small>أوامر اتقفلت</small><b class="num">${st.done}</b></div>
-      <div><small>عملاء لغوا</small><b class="num">${st.cancelled}</b></div>
-      <div><small>المسافة</small><b class="num">${st.km.toFixed(1)} كم</b></div>
-      <div><small>بنزين</small><b class="num neg">${fmt(st.fuel)}</b></div>
+  show(`<div class="hero"><span class="stamp">تقفيل اليومية</span><h1>يوم ${S.day} خلص</h1>
+      <p>سلّمت العهدة <b class="num">${fmt(handed)}</b> ج، وخدت مصنعيتك <b class="num">${fmt(labor)}</b> ج. رصيدك دلوقتي <b class="num">${fmt(S.balance)}</b> ج.</p></div>
+    <div class="card"><h2>حساب اليوم</h2><div class="bill">
+      <div><span>تحصيلات من العملاء</span><b class="num">${fmt(st.coll)}</b></div>
+      <div><span>عرابين</span><b class="num">${fmt(st.deps)}</b></div>
+      <div><span>بنزين</span><b class="num">− ${fmt(st.fuel)}</b></div>
+      <div class="tot"><span>العهدة اللي اتسلّمت</span><b class="num">${fmt(handed)}</b></div>
     </div>
-    <div class="kv"><span>التقييم: <b class="num ${dr >= 0 ? 'pos' : 'neg'}">${S.rep.toFixed(1)} (${dr >= 0 ? '+' : ''}${dr.toFixed(1)})</b></span>
-      ${carry ? `<span>فيه ${carry} أمر مترحّل لبكرة.</span>` : ''}</div></div>
-    <button class="btn big" data-act="next">ابدأ اليوم ${S.day + 1}</button>`);
-}
-
-export function showGameOver() {
-  show(`<div class="hero"><span class="stamp">مقفول</span><h1>الورشة قفلت</h1>
-      <p>تقييم العملاء نزل تحت النجمة. وصلت لليوم ${S.day} وحصّلت <b class="num">${fmt(S.total)}</b> جنيه.</p></div>
-    ${bestCard()}<button class="btn big" data-act="restart">افتح الورشة من جديد</button>`);
+    <div class="bill">
+      <div><span>قطع غيار</span><b class="num">${fmt(st.parts)}</b></div>
+      <div><span>كشوفات</span><b class="num">${fmt(st.visits)}</b></div>
+      <div class="tot pos"><span>مصنعيتك</span><b class="num">${fmt(labor)} ج</b></div>
+    </div></div>
+    <div class="card"><div class="report">
+      <div><small>أوامر خلصت</small><b class="num">${st.done}</b></div>
+      <div><small>مترحّلة لبكرة</small><b class="num">${open}</b></div>
+      <div><small>المسافة</small><b class="num">${st.km.toFixed(1)} كم</b></div>
+      <div><small>التقييم</small><b class="num ${dr >= 0 ? 'pos' : 'neg'}">${S.rep.toFixed(1)} (${dr >= 0 ? '+' : ''}${dr.toFixed(1)})</b></div>
+    </div></div>
+    <button class="btn big" data-act="next">ابدأ يوم ${S.day + 1}</button>`);
 }
 
 /* الأكاديمية: أول لبنة في الشق التعليمي. بتقرا من نفس بيانات الأعطال
@@ -59,5 +61,5 @@ export function showAcademy(dev) {
       <div class="lesson-h"><span class="code">${esc(f.code)}</span><div><b>${esc(f.sym)}</b><small>القطعة: ${PARTS[f.part].name}</small></div></div>
       <p>${esc(f.cause)}</p>
       <ol class="steps">${f.check.map((s) => `<li>${esc(s)}</li>`).join('')}</ol></div>`).join('')}
-    <button class="btn big" data-act="${S.phase === 'intro' ? 'home' : 'resume'}">${S.phase === 'intro' ? 'رجوع' : 'رجوع للعبة'}</button>`);
+    <button class="btn big" data-act="home">رجوع</button>`);
 }

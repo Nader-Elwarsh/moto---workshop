@@ -26,9 +26,10 @@ export function updateBike(dt, input) {
   b.x = clamp(b.x + Math.cos(b.a) * b.v * dt, 20, WORLD.w - 20);
   b.y = clamp(b.y + Math.sin(b.a) * b.v * dt, 20, WORLD.h - 20);
 
-  const before = S.fuel;
-  S.fuel = Math.max(0, S.fuel - b.v * dt * BAL.fuelPerPx);
-  if (S.stats) S.stats.km += b.v * dt * BAL.mPerPx / 1000;
+  const moved = b.v * dt, before = S.fuel;
+  S.fuel = Math.max(0, S.fuel - moved * BAL.fuelPerPx);
+  S.clock += moved * BAL.mPerPx / 1000 * BAL.minutesPerKm;   // الساعة بتمشي مع المسافة
+  if (S.stats) S.stats.km += moved * BAL.mPerPx / 1000;
   if (before > 1.5 && S.fuel <= 1.5) { emit('toast', { msg: 'البنزين قرب يخلص — روح البنزينة', kind: 'bad' }); emit('sound', 'horn'); }
   if (before > 0 && S.fuel <= 0) emit('toast', { msg: 'البنزين خلص! الموتوسيكل بيتزق بالعافية.', kind: 'bad' });
 }

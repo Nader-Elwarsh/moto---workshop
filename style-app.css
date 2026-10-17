@@ -147,3 +147,35 @@ details.guide summary{cursor:pointer;font-weight:700;font-size:14px}
 .boxchip{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:3px 10px;font-size:12.5px;display:inline-flex;gap:6px;align-items:center}
 .boxchip b{color:var(--bad);font-size:15px;line-height:1}
 .boxchip:hover{border-color:var(--bad)}
+
+/* خط السير: صف أمر + أسهم الترتيب */
+.stop{display:flex;align-items:stretch;gap:0;padding:0}
+.stop-main{display:flex;align-items:center;gap:10px;padding:9px 12px;flex:1;min-width:0;text-align:right;font-size:13.5px}
+.stop-main .t small{display:block}
+.code-sm{font-family:var(--f-display);color:var(--navy);font-size:14px}
+.ord{display:flex;flex-direction:column;justify-content:center;gap:2px;padding-inline:6px;border-inline-start:1px solid var(--line)}
+.arrow{width:34px;height:26px;border-radius:7px;background:var(--bg);font-size:12px;line-height:1}
+.arrow:disabled{opacity:.3;cursor:default}
+.empty-note{padding:12px;color:var(--muted);font-size:13.5px}
+.list-box{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.list-box .stop:first-child{border-top:0}
+
+/* الورشة */
+.sheet.ws .tabs{position:sticky;top:-16px;background:var(--surface);padding-block:6px;z-index:1}
+.ws-foot{display:grid;gap:8px;margin-top:4px}
+.st.ok{background:var(--good);color:#fff}
+.st.need{background:var(--amber);color:var(--on-amber)}
+
+
+/* الفاتورة */
+.bill{display:grid;gap:4px;background:var(--bg);border-radius:10px;padding:10px 12px;font-size:14px}
+.bill div{display:flex;justify-content:space-between;gap:10px}
+.bill span{color:var(--muted)}
+.bill .tot{border-top:1px dashed var(--line);padding-top:6px;margin-top:2px;font-weight:700}
+.bill .tot span{color:var(--ink)}
+.bill .tot.pos b{color:var(--good)}
+.st.out{background:var(--bad);color:#fff}
+.needed-box{padding:12px;gap:4px;border-color:color-mix(in srgb,var(--amber) 50%,var(--line))}
+.needed-box .shop-row:first-of-type{border-top:0}
+.all-parts{background:var(--bg);border-radius:10px;padding:8px 12px}
+.all-parts summary{cursor:pointer;font-weight:700;font-size:14px}

@@ -1,66 +1,75 @@
-/* الورشة والبنزينة: تسليم العهدة، تحميل قطع، تطوير، تفويل */
+/* الورشة: المخزن (تاخد/ترجّع قطع)، التطوير، والبنزينة */
 import { BAL } from './config.js';
 import { PARTS } from './data-devices.js';
 import { emit } from './core-events.js';
 import { S, boxCount } from './game-state.js';
+import { isActive } from './game-orders.js';
 
-export function handOverCustody() {
-  if (S.custody <= 0) return 0;
-  const v = S.custody;
-  S.wallet += v; S.custody = 0;
-  emit('toast', { msg: `سلّمت العهدة ${v} ج للمحفظة`, kind: 'good' });
-  emit('sound', 'coin');
-  return v;
+/* المخزن الصبح: كمية عشوائية من كل قطعة. القطع اللي أوامر مجمدة مستنياها
+   بتوصل من المورد (+1)، والقطع اللي رجعت امبارح بتفضل. */
+export function restockStore(r = Math.random) {
+  for (const k of Object.keys(PARTS)) {
+    const fresh = BAL.store.min + Math.floor(r() * (BAL.store.max - BAL.store.min + 1));
+    S.store[k] = Math.max(S.store[k] || 0, fresh);
+  }
+  for (const o of S.orders) if (o.status === 'frozen') S.store[o.part] = (S.store[o.part] || 0) + 1;
 }
 
-export function canLoad(k) { return S.wallet >= PARTS[k].cost && boxCount() < S.cap; }
+/* القطع اللي أوامر النهارده محتاجاها (عشان نعلّم عليها في المخزن) */
+export function neededParts() {
+  const need = {};
+  for (const o of S.orders) if (isActive(o) && o.status !== 'done') need[o.part] = (need[o.part] || 0) + 1;
+  return need;
+}
 
-export function loadPart(k) {
-  if (!canLoad(k)) return false;
-  S.wallet -= PARTS[k].cost;
-  S.box[k] = (S.box[k] || 0) + 1;
-  // لو فيه أمر مجمد مستني القطعة دي، خليه الوجهة الجاية
-  const waiting = S.orders.find((o) => o.status === 'frozen' && o.part === k);
-  if (waiting && S.box[k] === 1) S.target = { k: 'o', no: waiting.no };
+export const canTake = (k) => (S.store[k] || 0) > 0 && boxCount() < S.cap;
+
+export function takePart(k) {
+  if (!canTake(k)) return false;
+  S.store[k]--; S.box[k] = (S.box[k] || 0) + 1;
   emit('sound', 'ping');
   return true;
 }
 
-/* تنزيل قطعة من الصندوق للمخزن (بترجع فلوسها للمحفظة) — عشان تفضّي مكان */
-export function unloadPart(k) {
+export function returnPart(k) {
   if (!(S.box[k] > 0)) return false;
-  S.box[k]--;
-  S.wallet += PARTS[k].cost;
+  S.box[k]--; S.store[k] = (S.store[k] || 0) + 1;
   emit('sound', 'ping');
   return true;
 }
 
+export function returnAll() {
+  for (const k of Object.keys(S.box)) { S.store[k] = (S.store[k] || 0) + S.box[k]; S.box[k] = 0; }
+}
+
+/* ---------- التطوير (من رصيدك) ---------- */
 export function upgradeState(key) {
   const u = BAL.upgrades[key];
-  if (key === 'cap') return { done: S.cap >= u.max, can: S.wallet >= u.cost && S.cap < u.max };
-  if (key === 'fast') return { done: S.fast, can: S.wallet >= u.cost && !S.fast };
-  if (key === 'tank') return { done: S.tank >= u.max, can: S.wallet >= u.cost && S.tank < u.max };
+  if (key === 'cap') return { done: S.cap >= u.max, can: S.balance >= u.cost && S.cap < u.max };
+  if (key === 'fast') return { done: S.fast, can: S.balance >= u.cost && !S.fast };
+  if (key === 'tank') return { done: S.tank >= u.max, can: S.balance >= u.cost && S.tank < u.max };
 }
 
 export function buyUpgrade(key) {
   const u = BAL.upgrades[key];
   if (!upgradeState(key).can) return false;
-  S.wallet -= u.cost;
+  S.balance -= u.cost;
   if (key === 'cap') S.cap += u.step;
   if (key === 'fast') S.fast = true;
   if (key === 'tank') S.tank += u.step;
   emit('sound', 'coin');
+  emit('toast', { msg: `اتركّب: ${u.name}`, kind: 'good' });
   return true;
 }
 
+/* ---------- البنزين (من العهدة الأول، وبعدين من رصيدك) ---------- */
 export const fuelCost = () => Math.ceil((S.tank - S.fuel) * BAL.fuelPrice);
 
-/* البنزين بيتدفع من العهدة الأول، والباقي من المحفظة */
 export function refuel() {
   const c = fuelCost();
-  if (c <= 0 || S.custody + S.wallet < c) return false;
+  if (c <= 0 || S.custody + S.balance < c) return false;
   const fromCustody = Math.min(S.custody, c);
-  S.custody -= fromCustody; S.wallet -= c - fromCustody;
+  S.custody -= fromCustody; S.balance -= c - fromCustody;
   if (S.stats) S.stats.fuel += c;
   const liters = S.tank - S.fuel;
   S.fuel = S.tank;

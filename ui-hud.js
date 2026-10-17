@@ -1,5 +1,4 @@
 /* الشريط العلوي + الرسائل القصيرة */
-import { BAL } from './config.js';
 import { fmt } from './core-util.js';
 import { on } from './core-events.js';
 import { S } from './game-state.js';
@@ -9,13 +8,13 @@ const $ = (id) => document.getElementById(id);
 
 export function updateHud() {
   $('hClock').textContent = clockText();
-  $('hBar').style.width = Math.min(100, S.t / BAL.dayLen * 100) + '%';
   $('hDay').textContent = S.day;
   $('hCust').textContent = fmt(S.custody);
-  $('hWallet').textContent = fmt(S.wallet);
+  $('hBal').textContent = fmt(S.balance);
   const f = S.fuel / S.tank;
   $('hFuel').style.width = f * 100 + '%';
   $('hFuel').style.background = f < .2 ? 'var(--bad)' : 'var(--amber)';
+  $('hFuel').parentElement.title = S.fuel.toFixed(1) + ' لتر';
   $('hStars').querySelector('.fg').style.width = (S.rep / 5 * 100) + '%';
   $('hStars').title = S.rep.toFixed(1) + ' من 5';
 }

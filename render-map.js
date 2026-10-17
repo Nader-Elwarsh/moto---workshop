@@ -3,7 +3,7 @@
    (--m-*) فبتتغير تلقائيًا بين النهار والليل. */
 import { WORLD, WORKSHOP, GAS, VILLAGES, ROADS, CANAL, FIELDS, TREES, onRoad, inWater } from './data-world.js';
 import { S, byNo } from './game-state.js';
-import { isActive } from './game-orders.js';
+import { isActive, routeOrders } from './game-orders.js';
 import { surface } from './game-bike.js';
 import { joy } from './core-input.js';
 
@@ -117,24 +117,27 @@ function drawGround() {
 }
 
 function pinColor(o) {
-  if (o.status === 'req') return C.muted;
-  if (o.status === 'frozen') return C.frozen;
-  return o.pat / o.patMax < .3 ? C.bad : C.amber;
+  if (o.status === 'frozen') return S.box[o.part] > 0 ? C.good : C.frozen;
+  return C.amber;
 }
 function drawPins(now) {
   const tNo = S.target && S.target.k === 'o' ? S.target.no : null;
   const pulse = (now / 600) % 1;
-  for (const o of S.orders) {
-    if (o.status !== 'req' && !isActive(o)) continue;
-    const col = pinColor(o);
-    if (o.status !== 'req') { ctx.strokeStyle = col; ctx.globalAlpha = 1 - pulse; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(o.x, o.y + 6, 10 + pulse * 26, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; }
-    if (o.no === tNo) { ctx.strokeStyle = C.ink; ctx.lineWidth = 3; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.arc(o.x, o.y + 6, 40, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
-    ctx.globalAlpha = o.status === 'req' ? .6 : 1;
-    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(o.x, o.y + 8); ctx.arc(o.x, o.y - 14, 15, Math.PI * .75, Math.PI * .25); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = '700 11px "Readex Pro",Tahoma,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(String(o.no).slice(-2), o.x, o.y - 13);
-    ctx.globalAlpha = 1;
+  const order = routeOrders();
+  // خط السير: خط متقطع من الموتوسيكل للمحطات بالترتيب
+  if (order.length) {
+    ctx.strokeStyle = C.ink; ctx.globalAlpha = .35; ctx.lineWidth = 4; ctx.setLineDash([2, 12]); ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(S.bike.x, S.bike.y); for (const o of order) ctx.lineTo(o.x, o.y); ctx.stroke();
+    ctx.setLineDash([]); ctx.globalAlpha = 1;
   }
+  order.forEach((o, i) => {
+    const col = pinColor(o);
+    ctx.strokeStyle = col; ctx.globalAlpha = 1 - pulse; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(o.x, o.y + 6, 10 + pulse * 26, 0, 7); ctx.stroke(); ctx.globalAlpha = 1;
+    if (o.no === tNo) { ctx.strokeStyle = C.ink; ctx.lineWidth = 3; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.arc(o.x, o.y + 6, 40, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
+    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(o.x, o.y + 8); ctx.arc(o.x, o.y - 14, 15, Math.PI * .75, Math.PI * .25); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = '700 13px "Readex Pro",Tahoma,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(i + 1), o.x, o.y - 13);
+  });
 }
 function drawDust(dt, b) {
   if (surface !== 'road' && b.v > 40 && Math.random() < dt * 20) dust.push({ x: b.x - Math.cos(b.a) * 14, y: b.y - Math.sin(b.a) * 14, t: 0, c: surface });

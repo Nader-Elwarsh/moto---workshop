@@ -7,15 +7,19 @@ export const S = {};
 
 export function freshState() {
   return {
-    day: 1, t: 0, phase: 'intro',            // intro | play | report | over
-    wallet: BAL.start.wallet,                // فلوس الورشة
-    custody: 0,                              // عهدة الفني (اللي معاه في جيبه)
+    day: 1, phase: 'intro',                  // intro | play | report
+    clock: BAL.dayStart,                     // ساعة اللعبة بالدقايق (540 = 9:00)
+    wallet: BAL.start.wallet,                // خزنة الورشة
+    balance: BAL.start.balance,              // رصيدك إنت (المصنعية) — منه بتطوّر
+    custody: 0,                              // عهدة: الفلوس اللي معاك من العملاء النهارده
     rep: BAL.start.rep,                      // تقييم العملاء 0..5
     fuel: BAL.start.fuel, tank: BAL.start.tank,
     cap: BAL.start.boxCap, fast: false,
-    box: { ...BAL.startBox },                // قطع الغيار اللي على الموتوسيكل
+    store: {},                               // مخزن الورشة {partKey: qty}
+    box: {},                                 // صندوق الموتوسيكل {partKey: qty}
     bike: { x: WORKSHOP.x, y: WORKSHOP.y + 40, a: -Math.PI / 2, v: 0 },
-    orders: [], nextNo: 1001, spawnIn: BAL.requests.firstAt,
+    orders: [], nextNo: 1001,
+    route: [],                               // ترتيب خط السير (أرقام الأوامر)
     target: null,                            // {k:'o',no} | {k:'ws'} | {k:'gas'}
     repair: null,                            // {no, t, max}
     stats: null, total: 0,
