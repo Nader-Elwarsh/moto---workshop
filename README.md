@@ -4,7 +4,7 @@
 
 المشروع فيه شق تعليمي (**الأكاديمية**): أكواد الأعطال وأسبابها وخطوات الفحص. بيقرا من نفس بيانات اللعبة، فأي عطل جديد بيتضاف مرة واحدة ويظهر في المكانين.
 
-> النسخة الحالية: **0.1.0** — الأساس اللي هنبني عليه. شوف [docs/ROADMAP.md](docs/ROADMAP.md).
+> النسخة الحالية: **0.1.1** — الأساس اللي هنبني عليه. شوف [ROADMAP.md](ROADMAP.md).
 
 ## تشغيلها
 
@@ -12,7 +12,7 @@
 
 | الطريقة | إزاي |
 |---|---|
-| أونلاين | بعد ما يترفع على GitHub ويتربط بـ Cloudflare Pages (شوف [docs/WORKFLOW.md](docs/WORKFLOW.md)) |
+| أونلاين | بعد ما يترفع على GitHub ويتربط بـ Cloudflare Pages (شوف [WORKFLOW.md](WORKFLOW.md)) |
 | على الكمبيوتر | `npm run dev` وافتح `http://localhost:5173` |
 | ملف واحد للمعاينة | `npm run bundle` بيطلع `dist/game.html` |
 
@@ -20,23 +20,22 @@
 
 ## خريطة الملفات
 
-```
-index.html            الصفحة: الـ HUD واللوحات (الرسم كله على canvas)
-styles/
-  tokens.css          الألوان والخطوط (نهار/ليل)
-  app.css             تنسيق الواجهة
-src/
-  config.js           ⚙️ كل أرقام التوازن: أسعار، سرعات، صعوبة
-  main.js             نقطة البداية: بتربط كل حاجة + الحلقة
-  core/               أدوات عامة: أحداث، صوت، تحكم، مساعدات
-  data/               📚 المحتوى: الأجهزة والأعطال والقطع، الخريطة، الأسماء
-  game/               🧠 المنطق: حالة اللعبة، أوامر الشغل، الموتوسيكل، الوردية، الورشة
-  render/             🎨 رسم الخريطة
-  ui/                 🪟 الواجهة: HUD، لوحات، نوافذ، شاشات
-tests/                ✅ اختبارات المنطق (npm test)
-tools/                أدوات: فحص الكود، تجميع ملف واحد
-docs/                 📄 وثيقة التصميم، الخطة، طريقة الشغل، المعمارية
-```
+كل الملفات في مكان واحد من غير فولدرات (أسهل في الرفع من الموبايل). أول كلمة في اسم الملف بتقولك هو تبع أنهي جزء:
+
+| البادئة | الدور | أمثلة |
+|---|---|---|
+| — | البداية والإعدادات | `index.html`، `main.js`، ⚙️ `config.js` (كل الأسعار والصعوبة) |
+| `data-` | 📚 المحتوى | `data-devices.js` (الأجهزة والأعطال والقطع)، `data-world.js` (الخريطة) |
+| `game-` | 🧠 المنطق (من غير DOM) | `game-orders.js` (أوامر الشغل)، `game-day.js` (الوردية) |
+| `render-` | 🎨 الرسم | `render-map.js` |
+| `ui-` | 🪟 الواجهة | `ui-panels.js`، `ui-modals.js`، `ui-screens.js` |
+| `core-` | 🔧 أدوات عامة | `core-events.js`، `core-audio.js`، `core-input.js` |
+| `style-` | 🎨 التنسيق | `style-tokens.css` (الألوان)، `style-app.css` |
+| `tool-` | أدوات المطوّر | `tool-check.mjs`، `tool-bundle.mjs` |
+| `*.test.js` | ✅ الاختبارات | `orders.test.js` |
+| `*.md` | 📄 الوثائق | `GAME-DESIGN.md`، `ROADMAP.md`، `WORKFLOW.md`، `ARCHITECTURE.md` |
+
+الاستثناء الوحيد: `.github/workflows/ci.yml` (الفحص التلقائي). GitHub بيدوّر عليه في المكان ده بالظبط.
 
 ## أوامر سريعة
 
@@ -51,8 +50,8 @@ npm run bundle    # ملف HTML واحد في dist/
 
 ## الوثائق
 
-- [docs/GAME-DESIGN.md](docs/GAME-DESIGN.md) — فكرة اللعبة وقواعدها (المرجع لأي قرار)
-- [docs/ROADMAP.md](docs/ROADMAP.md) — المراحل الجاية
-- [docs/WORKFLOW.md](docs/WORKFLOW.md) — إزاي بنرفع ونعدّل ونجرّب
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — إزاي الكود متقسّم ولو عايز تضيف حاجة تحطها فين
+- [GAME-DESIGN.md](GAME-DESIGN.md) — فكرة اللعبة وقواعدها (المرجع لأي قرار)
+- [ROADMAP.md](ROADMAP.md) — المراحل الجاية
+- [WORKFLOW.md](WORKFLOW.md) — إزاي بنرفع ونعدّل ونجرّب
+- [ARCHITECTURE.md](ARCHITECTURE.md) — إزاي الكود متقسّم ولو عايز تضيف حاجة تحطها فين
 - [CHANGELOG.md](CHANGELOG.md) — سجل التغييرات

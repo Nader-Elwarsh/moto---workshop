@@ -1,14 +1,14 @@
 {
   "name": "moto-workshop",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "فني على الموتوسيكل — لعبة إدارة صيانة أجهزة منزلية مستوحاة من نظام الورشة الفنية",
   "type": "module",
   "scripts": {
     "dev": "npx --yes serve@14.2.4 -l 5173 .",
-    "test": "node --test tests/*.test.js",
-    "check": "node tools/check.mjs",
-    "bundle": "node tools/bundle.mjs"
+    "test": "node --test *.test.js",
+    "check": "node tool-check.mjs",
+    "bundle": "node tool-bundle.mjs"
   },
   "devDependencies": {
     "esbuild": "0.24.2"

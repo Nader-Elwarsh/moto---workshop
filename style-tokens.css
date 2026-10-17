@@ -1,0 +1,31 @@
+/* ألوان وخطوط اللعبة — نهار (فاتح) وليل (غامق). الخريطة بتقرا --m-* */
+/* Layout: full-screen top-down village map (canvas) with a navy HUD on top, a request card under it, and the route sheet at the bottom. */
+:root{
+  --bg:#e9edf1; --surface:#ffffff; --paper:#fbf6e8; --paper-edge:#e8dfc6;
+  --ink:#13202d; --muted:#5a6a7a; --line:#c9d2db;
+  --navy:#17324d; --on-navy:#ffffff; --amber:#e89a0c; --on-amber:#1c1404;
+  --good:#1d8049; --bad:#bf3a2b; --frozen:#2f7fb8;
+  --shadow:0 2px 0 #0000000f,0 10px 24px #17324d33;
+  /* map (daytime) */
+  --m-grass:#bcd08e; --m-field1:#a5c26c; --m-field2:#d3da93; --m-field3:#93b763; --m-road:#5b6570; --m-roadline:#f3e3a8;
+  --m-water:#6fb0d6; --m-bank:#9cc27a; --m-house:#efe2c9; --m-roof:#c4683a; --m-tree:#5f8f3c; --m-label:#13202d; --m-labelbg:#ffffffd9;
+  --m-shade:#00000000; --m-light:#fff6c400;
+  --f-display:"Lalezar","Readex Pro",Tahoma,sans-serif;
+  --f-body:"Readex Pro",Tahoma,"Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0c141d; --surface:#172331; --paper:#1f2b38; --paper-edge:#2c3a49;
+  --ink:#e5ecf2; --muted:#8c9cad; --line:#2a3846;
+  --navy:#8bb8e3; --on-navy:#0c141d; --amber:#f2ac35; --on-amber:#1c1404;
+  --good:#45b97a; --bad:#ef6a59; --frozen:#68b0e6; --shadow:0 2px 0 #00000040,0 10px 24px #00000080;
+  --m-grass:#1b281d; --m-field1:#20301e; --m-field2:#283622; --m-field3:#172417; --m-road:#353d48; --m-roadline:#9c8d5f;
+  --m-water:#1d4560; --m-bank:#1f3320; --m-house:#3b414b; --m-roof:#6a3b27; --m-tree:#1f351c; --m-label:#e5ecf2; --m-labelbg:#0c141dcc;
+  --m-shade:#050a1259; --m-light:#fff2b54d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c141d; --surface:#172331; --paper:#1f2b38; --paper-edge:#2c3a49;
+  --ink:#e5ecf2; --muted:#8c9cad; --line:#2a3846;
+  --navy:#8bb8e3; --on-navy:#0c141d; --amber:#f2ac35; --on-amber:#1c1404;
+  --good:#45b97a; --bad:#ef6a59; --frozen:#68b0e6; --shadow:0 2px 0 #00000040,0 10px 24px #00000080;
+  --m-grass:#1b281d; --m-field1:#20301e; --m-field2:#283622; --m-field3:#172417; --m-road:#353d48; --m-roadline:#9c8d5f;
+  --m-water:#1d4560; --m-bank:#1f3320; --m-house:#3b414b; --m-roof:#6a3b27; --m-tree:#1f351c; --m-label:#e5ecf2; --m-labelbg:#0c141dcc;
+  --m-shade:#050a1259; --m-light:#fff2b54d; color-scheme:dark}
