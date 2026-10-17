@@ -4,7 +4,7 @@
 
 المشروع فيه شق تعليمي (**الأكاديمية**): أكواد الأعطال وأسبابها وخطوات الفحص. بيقرا من نفس بيانات اللعبة، فأي عطل جديد بيتضاف مرة واحدة ويظهر في المكانين.
 
-> النسخة الحالية: **0.2.0** — الأساس اللي هنبني عليه. شوف [ROADMAP.md](ROADMAP.md).
+> النسخة الحالية: **0.3.0** — الأساس اللي هنبني عليه. شوف [ROADMAP.md](ROADMAP.md).
 
 ## تشغيلها
 
@@ -26,13 +26,13 @@
 |---|---|---|
 | — | البداية والإعدادات | `index.html`، `main.js`، ⚙️ `config.js` (كل الأسعار والصعوبة) |
 | `data-` | 📚 المحتوى | `data-devices.js` (الأجهزة والأعطال والقطع)، `data-world.js` (الخريطة) |
-| `game-` | 🧠 المنطق (من غير DOM) | `game-orders.js` (أوامر الشغل)، `game-day.js` (الوردية) |
+| `game-` | 🧠 المنطق (من غير DOM) | `game-orders.js` (أوامر الشغل)، `game-day.js` (اليوم)، `game-traffic.js` (العربيات) |
 | `render-` | 🎨 الرسم | `render-map.js` |
 | `ui-` | 🪟 الواجهة | `ui-panels.js`، `ui-modals.js`، `ui-screens.js` |
 | `core-` | 🔧 أدوات عامة | `core-events.js`، `core-audio.js`، `core-input.js` |
 | `style-` | 🎨 التنسيق | `style-tokens.css` (الألوان)، `style-app.css` |
 | `tool-` | أدوات المطوّر | `tool-check.mjs`، `tool-bundle.mjs` |
-| `*.test.js` | ✅ الاختبارات | `orders.test.js` |
+| `*.test.js` | ✅ الاختبارات | `orders.test.js`، `world.test.js` |
 | `*.md` | 📄 الوثائق | `GAME-DESIGN.md`، `ROADMAP.md`، `WORKFLOW.md`، `ARCHITECTURE.md` |
 
 الاستثناء الوحيد: `.github/workflows/ci.yml` (الفحص التلقائي). GitHub بيدوّر عليه في المكان ده بالظبط.

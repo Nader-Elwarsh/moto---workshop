@@ -8,6 +8,7 @@ import { initInput, readInput, releaseJoy } from './core-input.js';
 import { S, resetState } from './game-state.js';
 import { diagnose, freezeForPart, startRepair, moveInRoute } from './game-orders.js';
 import { updateBike } from './game-bike.js';
+import { spawnTraffic, updateTraffic } from './game-traffic.js';
 import { startDay, tickDay, closeDay } from './game-day.js';
 import { takePart, returnPart, buyUpgrade, refuel } from './game-shop.js';
 import { initMap, drawFrame, snapCamera } from './render-map.js';
@@ -80,6 +81,7 @@ function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000 || 0); last = now;
   if (S.phase === 'play') {
     updateBike(dt, readInput());
+    updateTraffic(dt);
     const repairing = S.repair && S.repair.no;
     tickDay(dt);
     if (repairing && !S.repair) closeModal();   // التصليح خلص
@@ -96,6 +98,7 @@ if (location.hash === '#debug') window.S = S;
 function boot(data) {
   resetState(data && data.S);
   initMap($('map'));
+  spawnTraffic();
   initInput($('map'), () => S.phase === 'play' && !ui.modal);
   $('muteIco').setAttribute('d', isMuted() ? MUTE_ON : MUTE_OFF);
   snapCamera();

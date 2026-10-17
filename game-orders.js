@@ -8,9 +8,9 @@
    ========================================================= */
 import { BAL } from './config.js';
 import { DEVICES, PARTS } from './data-devices.js';
-import { VILLAGES } from './data-world.js';
-import { FIRST_NAMES, LAST_NAMES } from './data-people.js';
-import { rnd, between, round10 } from './core-util.js';
+import { VILLAGES, snapToDrivable } from './data-world.js';
+import { NAMES, fakePhone } from './data-people.js';
+import { rnd, round10 } from './core-util.js';
 import { emit } from './core-events.js';
 import { S, byNo, addRep } from './game-state.js';
 
@@ -48,10 +48,11 @@ export function createOrder(r = Math.random) {
   do { vi = Math.floor(r() * VILLAGES.length); hi = Math.floor(r() * VILLAGES[vi].houses.length); } while (used.has(vi + ':' + hi) && ++guard < 40);
   const house = VILLAGES[vi].houses[hi];
   const dev = rnd(Object.keys(DEVICES), r), d = DEVICES[dev], f = rnd(d.faults, r);
+  const park = snapToDrivable(house.x, house.y);   // بتركن على أقرب أسفلت للبيت
   const o = {
-    no: S.nextNo++, day: S.day, cust: rnd(FIRST_NAMES, r) + ' ' + rnd(LAST_NAMES, r),
-    phone: '01' + rnd(['0', '1', '2', '5'], r) + String(Math.floor(between(10000000, 99999999, r))),
-    vi, hi, x: house.x, y: house.y - house.h / 2 - 4,
+    no: S.nextNo++, day: S.day, cust: rnd(NAMES, r), phone: fakePhone(r),
+    vi, hi, hx: house.x, hy: house.y - house.h / 2 - 4,  // البيت (الدبوس)
+    x: park.x, y: park.y,                                // مكان الركنة (الوصول)
     dev, brand: rnd(d.brands, r), code: f.code, sym: f.sym, part: f.part,
     status: 'new', dep: 0, log: [],
   };

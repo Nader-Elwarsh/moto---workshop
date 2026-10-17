@@ -7,6 +7,7 @@ import { S, byNo, boxCount } from './game-state.js';
 import { LABEL, priceOf, depositOf, laborOf, routeOrders } from './game-orders.js';
 import { canTake, neededParts, upgradeState, fuelCost } from './game-shop.js';
 import { ui, updateAction, renderRoute, orderRow } from './ui-panels.js';
+import { drawPlan } from './render-map.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -80,14 +81,16 @@ export function openWorkshop(tab) {
        <button class="btn big" data-act="close">اطلع على الطريق</button>
        <button class="btn big ghost" data-act="closeDay">${left ? `قفّل اليومية (فاضل ${left} أمر هيترحّل)` : 'قفّل اليومية وخد مصنعيتك'}</button>
      </div>`, 'ws');
+  if (ui.wsTab === 'orders') requestAnimationFrame(() => drawPlan($('planMap'), S.target && S.target.k === 'o' ? S.target.no : null));
   updateAction(true);
 }
 
 function ordersTab() {
   const list = routeOrders();
   if (!list.length) return '<div class="note">مفيش أوامر مفتوحة. قفّل اليومية عشان تاخد مصنعيتك وتبدأ يوم جديد.</div>';
-  return `<div class="kv"><span>رتّب خط السير بالأسهم. اللي فوق هو أول وجهة.</span></div>
-    <div class="list-box">${list.map((o, i) => orderRow(o, i, list.length, { act: 'pick' })).join('')}</div>
+  return `<div class="plan"><canvas id="planMap" aria-label="خريطة أوامر النهارده"></canvas></div>
+    <div class="kv"><span>اضغط على أمر عشان تشوفه على الخريطة. رتّب بالأسهم: اللي فوق هو أول وجهة.</span></div>
+    <div class="list-box">${list.map((o, i) => orderRow(o, i, list.length, { act: 'pick', on: !!(S.target && S.target.no === o.no) })).join('')}</div>
     <button class="btn amber" data-act="wsTab" data-tab="store">افتح المخزن وخد القطع ←</button>`;
 }
 

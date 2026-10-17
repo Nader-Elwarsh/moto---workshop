@@ -4,13 +4,12 @@
 import { WORLD, WORKSHOP, GAS, VILLAGES, ROADS, CANAL, FIELDS, TREES, onRoad, inWater } from './data-world.js';
 import { S, byNo } from './game-state.js';
 import { isActive, routeOrders } from './game-orders.js';
-import { surface } from './game-bike.js';
+import { cars, CAR_TYPES } from './game-traffic.js';
 import { joy } from './core-input.js';
 
 const C = {};
 let cv, ctx, vw = 0, vh = 0, dpr = 1, zoom = 1;
 const cam = { x: 0, y: 0 };
-let dust = [];
 
 export function initMap(canvas) {
   cv = canvas; ctx = cv.getContext('2d');
@@ -67,7 +66,7 @@ export function drawFrame(now, dt, { hudH, topReserve }) {
 
   drawGround();
   drawPins(now);
-  drawDust(dt, b);
+  drawCars();
   drawBike(b);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -131,19 +130,34 @@ function drawPins(now) {
     ctx.setLineDash([]); ctx.globalAlpha = 1;
   }
   order.forEach((o, i) => {
-    const col = pinColor(o);
-    ctx.strokeStyle = col; ctx.globalAlpha = 1 - pulse; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(o.x, o.y + 6, 10 + pulse * 26, 0, 7); ctx.stroke(); ctx.globalAlpha = 1;
-    if (o.no === tNo) { ctx.strokeStyle = C.ink; ctx.lineWidth = 3; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.arc(o.x, o.y + 6, 40, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
-    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(o.x, o.y + 8); ctx.arc(o.x, o.y - 14, 15, Math.PI * .75, Math.PI * .25); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = '700 13px "Readex Pro",Tahoma,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(String(i + 1), o.x, o.y - 13);
+    const col = pinColor(o), hx = o.hx ?? o.x, hy = o.hy ?? o.y;
+    // خط صغير من البيت لمكان الركنة على الأسفلت
+    ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(o.x, o.y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(o.x, o.y, 5, 0, 7); ctx.fill();
+    ctx.strokeStyle = col; ctx.globalAlpha = 1 - pulse; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(o.x, o.y, 10 + pulse * 26, 0, 7); ctx.stroke(); ctx.globalAlpha = 1;
+    if (o.no === tNo) { ctx.strokeStyle = C.ink; ctx.lineWidth = 3; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.arc(o.x, o.y, 40, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
+    pin(hx, hy, col, String(i + 1), 15);
   });
 }
-function drawDust(dt, b) {
-  if (surface !== 'road' && b.v > 40 && Math.random() < dt * 20) dust.push({ x: b.x - Math.cos(b.a) * 14, y: b.y - Math.sin(b.a) * 14, t: 0, c: surface });
-  dust = dust.filter((d) => (d.t += dt) < .7);
-  for (const d of dust) { ctx.globalAlpha = (1 - d.t / .7) * .5; ctx.fillStyle = d.c === 'water' ? '#ffffff' : '#b49a6a'; ctx.beginPath(); ctx.arc(d.x, d.y, 4 + d.t * 14, 0, 7); ctx.fill(); }
-  ctx.globalAlpha = 1;
+function pin(x, y, col, label, r) {
+  ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x, y + 8); ctx.arc(x, y - r + 1, r, Math.PI * .75, Math.PI * .25); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#ffffffcc'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = '#fff'; ctx.font = `700 ${Math.round(r * .9)}px "Readex Pro",Tahoma,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(label, x, y - r + 2);
+}
+function drawCars() {
+  for (const c of cars) {
+    const t = CAR_TYPES[c.type];
+    ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.a);
+    ctx.fillStyle = '#00000033'; ctx.fillRect(-t.len / 2 + 3, -t.wid / 2 + 3, t.len, t.wid);
+    ctx.fillStyle = c.color; ctx.beginPath(); ctx.roundRect(-t.len / 2, -t.wid / 2, t.len, t.wid, c.type === 'tuktuk' ? 6 : 4); ctx.fill();
+    ctx.fillStyle = '#1d2b3acc';   // زجاج
+    if (c.type === 'tractor') { ctx.fillRect(-4, -t.wid / 2 + 2, 10, t.wid - 4); ctx.fillStyle = '#111'; ctx.fillRect(-t.len / 2 - 2, -t.wid / 2 - 3, 11, 4); ctx.fillRect(-t.len / 2 - 2, t.wid / 2 - 1, 11, 4); }
+    else if (c.type === 'tuktuk') { ctx.fillRect(2, -t.wid / 2 + 2, 5, t.wid - 4); }
+    else { ctx.fillRect(t.len / 2 - 11, -t.wid / 2 + 2, 6, t.wid - 4); ctx.fillRect(-t.len / 2 + 4, -t.wid / 2 + 2, 4, t.wid - 4); }
+    if (C.night) { ctx.fillStyle = C.light; ctx.beginPath(); ctx.moveTo(t.len / 2, -t.wid / 2 + 2); ctx.lineTo(t.len / 2 + 60, -22); ctx.lineTo(t.len / 2 + 60, 22); ctx.lineTo(t.len / 2, t.wid / 2 - 2); ctx.closePath(); ctx.fill(); }
+    ctx.restore();
+  }
 }
 function drawBike(b) {
   ctx.save(); ctx.translate(b.x, b.y);
@@ -188,7 +202,7 @@ function drawMini(y) {
   for (const v of VILLAGES) { ctx.fillStyle = C.house; ctx.beginPath(); ctx.arc(v.x, v.y, 70, 0, 7); ctx.fill(); }
   ctx.fillStyle = C.navy; ctx.fillRect(WORKSHOP.x - 60, WORKSHOP.y - 60, 120, 120);
   ctx.fillStyle = C.bad; ctx.fillRect(GAS.x - 40, GAS.y - 40, 80, 80);
-  for (const o of S.orders) { if (!isActive(o)) continue; ctx.fillStyle = o.status === 'frozen' ? C.frozen : C.amber; ctx.beginPath(); ctx.arc(o.x, o.y, 60, 0, 7); ctx.fill(); }
+  for (const o of S.orders) { if (!isActive(o)) continue; ctx.fillStyle = o.status === 'frozen' ? C.frozen : C.amber; ctx.beginPath(); ctx.arc(o.hx ?? o.x, o.hy ?? o.y, 60, 0, 7); ctx.fill(); }
   ctx.fillStyle = C.ink; ctx.beginPath(); ctx.arc(S.bike.x, S.bike.y, 55, 0, 7); ctx.fill();
   ctx.strokeStyle = C.surface; ctx.lineWidth = 18; ctx.stroke();
   ctx.restore();
@@ -200,4 +214,38 @@ function drawJoy() {
   let dx = joy.x - joy.ox, dy = joy.y - joy.oy; const m = Math.hypot(dx, dy);
   if (m > 58) { dx *= 58 / m; dy *= 58 / m; }
   ctx.beginPath(); ctx.arc(joy.ox + dx, joy.oy + dy, 24, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+}
+
+/* ---------- خريطة التخطيط (في لوحة أوامر الورشة) ----------
+   الخريطة كلها مصغّرة: القرى بأساميها، الأوامر بأرقامها في خط السير،
+   والخط من الورشة للمحطات بالترتيب. الأمر المختار عليه دايرة. */
+export function drawPlan(canvas, selNo) {
+  if (!canvas) return;
+  const w = canvas.clientWidth || 320, h = w * WORLD.h / WORLD.w, pr = Math.min(2, devicePixelRatio || 1);
+  canvas.width = w * pr; canvas.height = h * pr; canvas.style.height = h + 'px';
+  const g = canvas.getContext('2d'), s = w / WORLD.w;
+  const prev = ctx; ctx = g;   // نعيد استخدام نفس دوال الرسم
+  g.setTransform(pr, 0, 0, pr, 0, 0); g.fillStyle = C.grass; g.fillRect(0, 0, w, h);
+  g.setTransform(pr * s, 0, 0, pr * s, 0, 0);
+  for (const f of FIELDS) { g.save(); g.translate(f.x + f.w / 2, f.y + f.h / 2); g.rotate(f.r); g.fillStyle = C['field' + f.c]; g.fillRect(-f.w / 2, -f.h / 2, f.w, f.h); g.restore(); }
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  path(CANAL); g.strokeStyle = C.water; g.lineWidth = 60; g.stroke();
+  for (const r of ROADS) { path(r); g.strokeStyle = C.road; g.lineWidth = 34; g.stroke(); }
+  for (const v of VILLAGES) { g.fillStyle = C.road; g.beginPath(); g.arc(v.x, v.y, 60, 0, 7); g.fill(); for (const hs of v.houses) { g.fillStyle = C.house; g.fillRect(hs.x - hs.w / 2, hs.y - hs.h / 2, hs.w, hs.h); } }
+  g.fillStyle = C.navy; g.fillRect(WORKSHOP.x - 70, WORKSHOP.y - 70, 140, 120);
+  g.fillStyle = C.bad; g.fillRect(GAS.x - 40, GAS.y - 35, 80, 60);
+  const order = routeOrders();
+  g.strokeStyle = C.ink; g.globalAlpha = .55; g.lineWidth = 14; g.setLineDash([10, 34]);
+  g.beginPath(); g.moveTo(S.bike.x, S.bike.y); for (const o of order) g.lineTo(o.x, o.y); g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
+  // أسماء القرى (بحجم مقروء مهما الخريطة صغرت)
+  const fs = 11 / s;
+  for (const v of VILLAGES) pill(v.x, v.y + 110, v.name, C.labelbg, C.label, fs);
+  pill(WORKSHOP.x, WORKSHOP.y + 120, 'الورشة', C.amber, '#1c1404', fs);
+  order.forEach((o, i) => {
+    const x = o.hx ?? o.x, y = o.hy ?? o.y;
+    if (o.no === selNo) { g.strokeStyle = C.ink; g.lineWidth = 12; g.beginPath(); g.arc(x, y - 50, 110, 0, 7); g.stroke(); }
+    pin(x, y, pinColor(o), String(i + 1), 13 / s);
+  });
+  g.fillStyle = C.ink; g.beginPath(); g.arc(S.bike.x, S.bike.y, 40, 0, 7); g.fill();
+  ctx = prev;
 }

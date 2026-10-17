@@ -1,16 +1,14 @@
-/* فيزيا الموتوسيكل: لف ناحية اتجاه التحكم، وسرعة حسب الأرض والبنزين */
+/* فيزيا الموتوسيكل: لف ناحية اتجاه التحكم، وماشي على الأسفلت بس.
+   لو حاولت تطلع برا الطريق بيتزحلق على حافته. */
 import { BAL } from './config.js';
-import { WORLD, surfaceAt } from './data-world.js';
+import { snapToDrivable } from './data-world.js';
 import { clamp } from './core-util.js';
 import { emit } from './core-events.js';
 import { S } from './game-state.js';
 
-export let surface = 'road';
-
 export function updateBike(dt, input) {
   const b = S.bike;
-  surface = surfaceAt(b.x, b.y);
-  let max = BAL.speed[surface] * (S.fast ? BAL.fastBonus : 1);
+  let max = BAL.speed.road * (S.fast ? BAL.fastBonus : 1);
   if (S.fuel <= 0) max = BAL.speed.empty;
 
   let target = 0;
@@ -23,10 +21,15 @@ export function updateBike(dt, input) {
     target = max * input.m * (Math.abs(d) > 2.2 ? .4 : 1);
   }
   b.v += (target - b.v) * Math.min(1, dt * (target > b.v ? 2.4 : 4.5));
-  b.x = clamp(b.x + Math.cos(b.a) * b.v * dt, 20, WORLD.w - 20);
-  b.y = clamp(b.y + Math.sin(b.a) * b.v * dt, 20, WORLD.h - 20);
 
-  const moved = b.v * dt, before = S.fuel;
+  const ox = b.x, oy = b.y;
+  const p = snapToDrivable(b.x + Math.cos(b.a) * b.v * dt, b.y + Math.sin(b.a) * b.v * dt);
+  b.x = p.x; b.y = p.y;
+  const moved = Math.hypot(b.x - ox, b.y - oy);
+  // لو الحافة وقفته خالص، السرعة تقل (زي ما تكون خبطت في الرصيف)
+  if (Math.abs(b.v) * dt > 0.5 && moved < Math.abs(b.v) * dt * .3) b.v *= .5;
+
+  const before = S.fuel;
   S.fuel = Math.max(0, S.fuel - moved * BAL.fuelPerPx);
   S.clock += moved * BAL.mPerPx / 1000 * BAL.minutesPerKm;   // الساعة بتمشي مع المسافة
   if (S.stats) S.stats.km += moved * BAL.mPerPx / 1000;

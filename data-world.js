@@ -20,6 +20,8 @@ export const VILLAGES = [
 // 'W' = الورشة، والأرقام = ترتيب القرية في VILLAGES
 const EDGES = [['W', 1], ['W', 7], ['W', 3], ['W', 5], [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 0]];
 const node = (k) => (k === 'W' ? WORKSHOP : VILLAGES[k]);
+// أطراف كل طريق (عشان العربيات تعرف تلف على أنهي طريق عند التقاطع)
+export const ROAD_ENDS = EDGES.map(([a, b]) => [String(a), String(b)]);
 
 /* كل طريق منحنى بيتحول لنقط، فالرسم والفيزيا بيستخدموا نفس الشكل */
 export const ROADS = EDGES.map(([a, b]) => {
@@ -76,4 +78,44 @@ export const surfaceAt = (x, y) => (onRoad(x, y) ? 'road' : inWater(x, y) ? 'wat
   let best = ROADS[2][0], bd = Infinity;
   for (const p of ROADS[2]) { const d = Math.abs(Math.hypot(p.x - WORKSHOP.x, p.y - WORKSHOP.y) - 480); if (d < bd) { bd = d; best = p; } }
   GAS.x = best.x; GAS.y = best.y + 48;
+}
+
+/* ---------- حدود السواقة ----------
+   الموتوسيكل ما يخرجش عن الأسفلت: الطرق + ميادين القرى + الورشة + البنزينة */
+export const ROAD_HALF = 20;
+export const PLAZAS = () => [
+  { x: WORKSHOP.x, y: WORKSHOP.y, r: 70 }, { x: GAS.x, y: GAS.y, r: 50 },
+  ...VILLAGES.map((v) => ({ x: v.x, y: v.y, r: 55 })),
+];
+
+/* أقرب نقطة مسموح السواقة فيها لأي نقطة (لو النقطة نفسها مسموحة بترجعها زي ما هي) */
+export function snapToDrivable(x, y) {
+  let best = null, bd = Infinity;
+  const consider = (px, py) => { const d = Math.hypot(px - x, py - y); if (d < bd) { bd = d; best = { x: px, y: py }; } };
+  for (const r of ROADS) for (let i = 0; i < r.length - 1; i++) {
+    const a = r[i], b = r[i + 1], dx = b.x - a.x, dy = b.y - a.y, l = dx * dx + dy * dy;
+    const t = Math.max(0, Math.min(1, l ? ((x - a.x) * dx + (y - a.y) * dy) / l : 0));
+    const cx = a.x + t * dx, cy = a.y + t * dy, d = Math.hypot(x - cx, y - cy);
+    const k = d > ROAD_HALF ? ROAD_HALF / d : 1;
+    consider(cx + (x - cx) * k, cy + (y - cy) * k);
+    if (bd === 0) return best;
+  }
+  for (const p of PLAZAS()) {
+    const d = Math.hypot(x - p.x, y - p.y), k = d > p.r ? p.r / d : 1;
+    consider(p.x + (x - p.x) * k, p.y + (y - p.y) * k);
+    if (bd === 0) return best;
+  }
+  return best;
+}
+
+/* طول كل طريق (للعربيات اللي ماشية عليه) */
+export const ROAD_LEN = ROADS.map((r) => { const acc = [0]; for (let i = 1; i < r.length; i++) acc.push(acc[i - 1] + Math.hypot(r[i].x - r[i - 1].x, r[i].y - r[i - 1].y)); return acc; });
+
+/* مكان واتجاه على طريق عند مسافة s من أوله */
+export function pointOnRoad(ri, s) {
+  const r = ROADS[ri], acc = ROAD_LEN[ri], L = acc[acc.length - 1];
+  s = Math.max(0, Math.min(L, s));
+  let i = 1; while (i < acc.length - 1 && acc[i] < s) i++;
+  const a = r[i - 1], b = r[i], t = (s - acc[i - 1]) / ((acc[i] - acc[i - 1]) || 1);
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, a: Math.atan2(b.y - a.y, b.x - a.x) };
 }

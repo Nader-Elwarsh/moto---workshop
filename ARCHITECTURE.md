@@ -35,7 +35,9 @@ readInput → updateBike → tickDay (طلبات، صبر، تصليح، نها�
 | الحاجة | تحطها فين |
 |---|---|
 | جهاز أو عطل أو قطعة | `data-devices.js` (الاختبارات بتتأكد إن كل عطل مربوط بقطعة صح) |
-| قرية أو طريق | `data-world.js` (`VILLAGES` و`EDGES`) |
+| قرية أو طريق | `data-world.js` (`VILLAGES` و`EDGES`). الطريق الجديد بيبقى قابل للسواقة وعليه عربيات لوحده |
+| نوع عربية جديد | `CAR_TYPES` و`MIX` في `game-traffic.js` |
+| أسامي العملاء | `data-people.js` |
 | تغيير سعر أو صعوبة | `config.js` |
 | حالة جديدة لأمر الشغل | `FLOW` و`LABEL` في `game-orders.js` + اختبار |
 | زرار جديد | `data-act="اسم"` في الـ HTML + دالة في `ACTIONS` في `main.js` |

@@ -179,3 +179,7 @@ details.guide summary{cursor:pointer;font-weight:700;font-size:14px}
 .needed-box .shop-row:first-of-type{border-top:0}
 .all-parts{background:var(--bg);border-radius:10px;padding:8px 12px}
 .all-parts summary{cursor:pointer;font-weight:700;font-size:14px}
+
+/* خريطة التخطيط في لوحة الأوامر */
+.plan{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--m-grass)}
+.plan canvas{display:block;width:100%}
